@@ -78,7 +78,42 @@ module aes_core(input  logic         clk,
                 input  logic [127:0] plaintext, 
                 output logic         done, 
                 output logic [127:0] cyphertext);
+    logic [3:0]         counter;
+    logic               last;
+    logic [2:0]         op;
+    logic [0:10][127:0] key_schedule;
+    logic [127:0]       round_key;
+    logic [127:0]       AddRoundKey_in, AddRoundKey_out, flop_in, SubBytes_out, ShiftRows_in, ShiftRows_out, MixColumns_in, MixColumns_out;
+    // if bad check enable but should be fine because output flipflop guarded
+    counter #(4,11) counter(.clk, .reset(load), .enable(1), .counter); 
+    assign last = (counter == 4'ha);
+    AES_fsm AES_fsm(.clk, .load, .last, .op);
+    KeyExpansion KeyExpansion(.key, .key_schedule);
+    always_comb
+        case (counter)
+            4'h0: round_key = key_schedule[0];
+            4'h1: round_key = key_schedule[1];
+            4'h2: round_key = key_schedule[2];
+            4'h3: round_key = key_schedule[3];
+            4'h4: round_key = key_schedule[4];
+            4'h5: round_key = key_schedule[5];
+            4'h6: round_key = key_schedule[6];
+            4'h7: round_key = key_schedule[7];
+            4'h8: round_key = key_schedule[8];
+            4'h9: round_key = key_schedule[9];
+            4'ha: round_key = key_schedule[10];
+        endcase
 
+    enable_flop #(128) enable_flop(.clk, .reset(1), .enable(~done), .d_in(flop_in), .d_out(cyphertext));
+    mux2 muxSUB(.a0(cyphertext), .a1(SubBytes_out), .s(op[0]), .y(ShiftRows_in));
+    mux2 muxSHIFT(.a0(ShiftRows_in), .a1(ShiftRows_out), .s(op[1]), .y(MixColumns_in));
+    mux2 muxMIX(.a0(MixColumns_in), .a1(MixColumns_out), .s(op[2]), .y(AddRoundKey_in));
+    mux2 muxPLAIN(.a0(AddRoundKey_out), .a1(plaintext), .s(load), .y(flop_in));
+    
+    SubBytes SubBytes(.a(cyphertext), .y(SubBytes_out));
+    ShiftRows ShiftRows(.a(ShiftRows_in), .y(ShiftRows_out));
+    mixcolumns mixcolumns(.a(MixColumns_in), .y(MixColumns_out));
+    AddRoundKey AddRoundKey(.a(AddRoundKey_in), .key(round_key), .y(AddRoundKey_out));
     // TODO: Your code goes here
     
 endmodule
