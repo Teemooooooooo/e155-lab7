@@ -1,7 +1,7 @@
 
 module AES_fsm(
     input  logic  clk, load, last,
-    output logic [2:0] op
+    output logic [2:0] op,
     output logic done);
     typedef enum logic [1:0] {FIRST_R, MIDDLE_R, LAST_R, END_R} statetype;
     statetype state, nextstate;

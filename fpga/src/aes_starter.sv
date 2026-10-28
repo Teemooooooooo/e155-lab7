@@ -81,36 +81,25 @@ module aes_core(input  logic         clk,
     logic [3:0]         counter;
     logic               last;
     logic [2:0]         op;
-    logic [0:10][127:0] key_schedule;
-    logic [127:0]       round_key;
+    logic [127:0]       round_key, nextkey, not_OG_key;
     logic [127:0]       AddRoundKey_in, AddRoundKey_out, flop_in, SubBytes_out, ShiftRows_in, ShiftRows_out, MixColumns_in, MixColumns_out;
     // if bad check enable but should be fine because output flipflop guarded
-    counter #(4,11) counter(.clk, .reset(load), .enable(1), .counter); 
+    counter #(4,11) counter_module(.clk, .reset(load), .enable(1'b1), .counter); 
     assign last = (counter == 4'ha);
-    AES_fsm AES_fsm(.clk, .load, .last, .op);
-    KeyExpansion KeyExpansion(.key, .key_schedule);
-    always_comb
-        case (counter)
-            4'h0: round_key = key_schedule[0];
-            4'h1: round_key = key_schedule[1];
-            4'h2: round_key = key_schedule[2];
-            4'h3: round_key = key_schedule[3];
-            4'h4: round_key = key_schedule[4];
-            4'h5: round_key = key_schedule[5];
-            4'h6: round_key = key_schedule[6];
-            4'h7: round_key = key_schedule[7];
-            4'h8: round_key = key_schedule[8];
-            4'h9: round_key = key_schedule[9];
-            4'ha: round_key = key_schedule[10];
-        endcase
+    AES_fsm AES_fsm(.clk, .load, .last, .op, .done);
+	
+    KeyExpansion KeyExpansion(.key(round_key), .nextkey, .round(counter));
+    mux2 muxKEY(.a0(key), .a1(not_OG_key), .s(load), .y(round_key));
 
     enable_flop #(128) enable_flop(.clk, .reset(1), .enable(~done), .d_in(flop_in), .d_out(cyphertext));
+	enable_flop #(128) enable_flop_key(.clk, .reset(1), .enable(~done), .d_in(nextkey), .d_out(not_OG_key));
+	
     mux2 muxSUB(.a0(cyphertext), .a1(SubBytes_out), .s(op[0]), .y(ShiftRows_in));
     mux2 muxSHIFT(.a0(ShiftRows_in), .a1(ShiftRows_out), .s(op[1]), .y(MixColumns_in));
     mux2 muxMIX(.a0(MixColumns_in), .a1(MixColumns_out), .s(op[2]), .y(AddRoundKey_in));
     mux2 muxPLAIN(.a0(AddRoundKey_out), .a1(plaintext), .s(load), .y(flop_in));
     
-    SubBytes SubBytes(.a(cyphertext), .y(SubBytes_out));
+    SubBytes SubBytes(.a(cyphertext), .y(SubBytes_out), .clk);
     ShiftRows ShiftRows(.a(ShiftRows_in), .y(ShiftRows_out));
     mixcolumns mixcolumns(.a(MixColumns_in), .y(MixColumns_out));
     AddRoundKey AddRoundKey(.a(AddRoundKey_in), .key(round_key), .y(AddRoundKey_out));
@@ -132,7 +121,7 @@ module sbox(input  logic [7:0] a,
   // This module is combinational and will be inferred using LUTs (logic cells)
   logic [7:0] sbox[0:255];
 
-  initial   $readmemh("sbox.txt", sbox);
+  initial   $readmemh("C:/Users/ellyu/Documents/GitHub/e155-lab7/fpga/src/sbox.txt", sbox);
   assign y = sbox[a];
 endmodule
 
@@ -151,7 +140,7 @@ module sbox_sync(
   // This module is synchronous and will be inferred using BRAMs (Block RAMs)
   logic [7:0] sbox [0:255];
 
-  initial   $readmemh("sbox.txt", sbox);
+  initial   $readmemh("C:/Users/ellyu/Documents/GitHub/e155-lab7/fpga/src/sbox.txt", sbox);
 	
 	// Synchronous version
 	always_ff @(posedge clk) begin
