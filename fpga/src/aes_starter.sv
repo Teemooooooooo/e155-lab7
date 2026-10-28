@@ -84,15 +84,15 @@ module aes_core(input  logic         clk,
     logic [127:0]       round_key, nextkey, not_OG_key;
     logic [127:0]       AddRoundKey_in, AddRoundKey_out, flop_in, SubBytes_out, ShiftRows_in, ShiftRows_out, MixColumns_in, MixColumns_out;
     // if bad check enable but should be fine because output flipflop guarded
-    counter #(4,11) counter_module(.clk, .reset(load), .enable(1'b1), .counter); 
+    counter #(4,11) counter_module(.clk, .reset(~load), .enable(1'b1), .counter); 
     assign last = (counter == 4'ha);
     AES_fsm AES_fsm(.clk, .load, .last, .op, .done);
 	
     KeyExpansion KeyExpansion(.key(round_key), .nextkey, .round(counter));
-    mux2 muxKEY(.a0(key), .a1(not_OG_key), .s(load), .y(round_key));
+    mux2 muxKEY(.a0(not_OG_key), .a1(key), .s(load), .y(round_key));
 
-    enable_flop #(128) enable_flop(.clk, .reset(1), .enable(~done), .d_in(flop_in), .d_out(cyphertext));
-	enable_flop #(128) enable_flop_key(.clk, .reset(1), .enable(~done), .d_in(nextkey), .d_out(not_OG_key));
+    enable_flop #(128) enable_flop(.clk, .reset(1'b1), .enable(~done), .d_in(flop_in), .d_out(cyphertext));
+	enable_flop #(128) enable_flop_key(.clk, .reset(1'b1), .enable(~done), .d_in(nextkey), .d_out(not_OG_key));
 	
     mux2 muxSUB(.a0(cyphertext), .a1(SubBytes_out), .s(op[0]), .y(ShiftRows_in));
     mux2 muxSHIFT(.a0(ShiftRows_in), .a1(ShiftRows_out), .s(op[1]), .y(MixColumns_in));
