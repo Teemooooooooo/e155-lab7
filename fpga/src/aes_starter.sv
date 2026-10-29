@@ -88,7 +88,7 @@ module aes_core(input  logic         clk,
     assign last = (counter == 4'ha);
     AES_fsm AES_fsm(.clk, .load, .last, .op, .done);
 	
-    KeyExpansion KeyExpansion(.key(round_key), .key_new(nextkey), .round(counter), .clk);
+    KeyExpansion KeyExpansion(.key(round_key), .nextkey, .round(counter+4'b1));
     mux2 muxKEY(.a0(not_OG_key), .a1(key), .s(counter == 4'h0), .y(round_key));
 
     enable_flop #(128) enable_flop(.clk, .reset(1'b1), .enable(~done), .d_in(flop_in), .d_out(cyphertext));
