@@ -1,6 +1,7 @@
 
 
 module SubWord(input  logic[31:0] a,
+				input logic clk,
                output logic[31:0] y);
 
     sbox sboxW0(.a(a[31:24]), .y(y[31:24]));

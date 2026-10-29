@@ -88,8 +88,8 @@ module aes_core(input  logic         clk,
     assign last = (counter == 4'ha);
     AES_fsm AES_fsm(.clk, .load, .last, .op, .done);
 	
-    KeyExpansion KeyExpansion(.key(round_key), .nextkey, .round(counter));
-    mux2 muxKEY(.a0(not_OG_key), .a1(key), .s(load), .y(round_key));
+    KeyExpansion KeyExpansion(.key(round_key), .key_new(nextkey), .round(counter), .clk);
+    mux2 muxKEY(.a0(not_OG_key), .a1(key), .s(counter == 4'h0), .y(round_key));
 
     enable_flop #(128) enable_flop(.clk, .reset(1'b1), .enable(~done), .d_in(flop_in), .d_out(cyphertext));
 	enable_flop #(128) enable_flop_key(.clk, .reset(1'b1), .enable(~done), .d_in(nextkey), .d_out(not_OG_key));
@@ -97,7 +97,7 @@ module aes_core(input  logic         clk,
     mux2 muxSUB(.a0(cyphertext), .a1(SubBytes_out), .s(op[0]), .y(ShiftRows_in));
     mux2 muxSHIFT(.a0(ShiftRows_in), .a1(ShiftRows_out), .s(op[1]), .y(MixColumns_in));
     mux2 muxMIX(.a0(MixColumns_in), .a1(MixColumns_out), .s(op[2]), .y(AddRoundKey_in));
-    mux2 muxPLAIN(.a0(AddRoundKey_out), .a1(plaintext), .s(load), .y(flop_in));
+    mux2 muxPLAIN(.a0(AddRoundKey_out), .a1(plaintext), .s(counter == 4'h0), .y(flop_in));
     
     SubBytes SubBytes(.a(cyphertext), .y(SubBytes_out), .clk);
     ShiftRows ShiftRows(.a(ShiftRows_in), .y(ShiftRows_out));
