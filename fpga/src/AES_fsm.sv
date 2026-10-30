@@ -15,7 +15,7 @@ module AES_fsm(
             FIRST_R:                      begin nextstate = MIDDLE_R; op = 3'b000; end
             MIDDLE_R:  if (last)          begin nextstate = LAST_R;   op = 3'b111; end
                        else               begin nextstate = MIDDLE_R; op = 3'b111; end
-            LAST_R:                       begin nextstate = END_R;    op = 3'b110; end
+            LAST_R:                       begin nextstate = END_R;    op = 3'b011; end
             END_R:                        begin nextstate = END_R;    op = 3'b000; end
 			default:                      begin nextstate = FIRST_R;  op = 3'b000; end
         endcase

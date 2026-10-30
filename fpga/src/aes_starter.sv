@@ -85,7 +85,7 @@ module aes_core(input  logic         clk,
     logic [127:0]       AddRoundKey_in, AddRoundKey_out, flop_in, SubBytes_out, ShiftRows_in, ShiftRows_out, MixColumns_in, MixColumns_out;
     // if bad check enable but should be fine because output flipflop guarded
     counter #(4,11) counter_module(.clk, .reset(~load), .enable(1'b1), .counter); 
-    assign last = (counter == 4'ha);
+    assign last = (counter == 4'h9);
     AES_fsm AES_fsm(.clk, .load, .last, .op, .done);
 	
     KeyExpansion KeyExpansion(.key(round_key), .nextkey, .round(counter+4'b1));
@@ -97,7 +97,7 @@ module aes_core(input  logic         clk,
     mux2 muxSUB(.a0(cyphertext), .a1(SubBytes_out), .s(op[0]), .y(ShiftRows_in));
     mux2 muxSHIFT(.a0(ShiftRows_in), .a1(ShiftRows_out), .s(op[1]), .y(MixColumns_in));
     mux2 muxMIX(.a0(MixColumns_in), .a1(MixColumns_out), .s(op[2]), .y(AddRoundKey_in));
-    mux2 muxPLAIN(.a0(AddRoundKey_out), .a1(plaintext), .s(counter == 4'h0), .y(flop_in));
+    mux2 muxPLAIN(.a0(AddRoundKey_out), .a1(plaintext), .s(load), .y(flop_in));
     
     SubBytes SubBytes(.a(cyphertext), .y(SubBytes_out), .clk);
     ShiftRows ShiftRows(.a(ShiftRows_in), .y(ShiftRows_out));
@@ -143,7 +143,7 @@ module sbox_sync(
   initial   $readmemh("C:/Users/ellyu/Documents/GitHub/e155-lab7/fpga/src/sbox.txt", sbox);
 	
 	// Synchronous version
-	always_ff @(posedge clk) begin
+	always_ff @(negedge clk) begin
 		y <= sbox[a];
 	end
 endmodule
