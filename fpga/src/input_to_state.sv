@@ -1,4 +1,6 @@
-// packing the 128 bits into words
+// Ellen Yu ellyu@g.hmc.edu
+// Oct. 30, 2026
+// packing the 128 bits into words (states)
 
 module input_to_state(input  logic [127:0] a,
                       output logic [0:3][0:3][7:0] y);

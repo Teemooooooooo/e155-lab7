@@ -1,3 +1,6 @@
+// Ellen Yu ellyu@g.hmc.edu
+// Oct 30, 2026
+// main AES finite state machine that controls what operations should be performed based on each round
 
 module AES_fsm(
     input  logic  clk, load, last,

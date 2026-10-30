@@ -1,4 +1,6 @@
-
+// Ellen Yu ellyu@g.hmc.edu
+// Oct. 30, 2026
+// generate the new roundkey based on previous key
 
 module KeyExpansion(input  logic [127:0] key,
 				    input  logic [3:0]   round,

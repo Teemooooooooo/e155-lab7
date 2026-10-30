@@ -1,4 +1,6 @@
-//
+// Ellen Yu ellyu@g.hmc.edu
+// Oct. 30, 2026
+// module that performs sbox on each byte
 
 module SubBytes(input  logic [127:0] a,
 				input  logic clk,

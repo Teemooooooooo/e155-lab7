@@ -1,4 +1,6 @@
-
+// Ellen Yu ellyu@g.hmc.edu
+// Oct. 30, 2026
+// perform sbox on the word (used in key expansion)
 
 module SubWord(input  logic[31:0] a,
 				input logic clk,

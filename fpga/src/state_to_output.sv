@@ -1,4 +1,6 @@
-
+// Ellen Yu ellyu@g.hmc.edu
+// Oct. 30, 2026
+// convert states to 128 bits output
 
 module state_to_output(input  logic [0:3][0:3][7:0] a,
                        output logic [127:0]         y);

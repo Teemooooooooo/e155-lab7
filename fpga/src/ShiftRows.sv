@@ -1,3 +1,6 @@
+// Ellen Yu ellyu@g.hmc.edu
+// Oct. 30, 2026
+// Shift rows around for AES 
 
 module ShiftRows(input  logic [127:0] a,
                  output logic [127:0] y);
