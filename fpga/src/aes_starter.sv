@@ -88,7 +88,7 @@ module aes_core(input  logic         clk,
     assign last = (counter == 4'h9);
     AES_fsm AES_fsm(.clk, .load, .last, .op, .done);
 	
-    KeyExpansion KeyExpansion(.key(round_key), .nextkey, .round(counter+4'b1));
+    KeyExpansion KeyExpansion(.key(round_key), .nextkey, .round(counter+4'b1)); // generate the key for next round
     mux2 muxKEY(.a0(not_OG_key), .a1(key), .s(counter == 4'h0), .y(round_key));
 
     enable_flop #(128) enable_flop(.clk, .reset(1'b1), .enable(~done), .d_in(flop_in), .d_out(cyphertext));
@@ -103,7 +103,6 @@ module aes_core(input  logic         clk,
     ShiftRows ShiftRows(.a(ShiftRows_in), .y(ShiftRows_out));
     mixcolumns mixcolumns(.a(MixColumns_in), .y(MixColumns_out));
     AddRoundKey AddRoundKey(.a(AddRoundKey_in), .key(round_key), .y(AddRoundKey_out));
-    // TODO: Your code goes here
     
 endmodule
 
